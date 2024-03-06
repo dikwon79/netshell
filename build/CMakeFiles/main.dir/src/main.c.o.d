@@ -1,5 +1,5 @@
 CMakeFiles/main.dir/src/main.c.o: \
- /home/dongil/work/programming101dev/templates/template-c/src/main.c \
+ /home/dongil/work/programming101dev/templates/netshell/src/main.c \
  /usr/include/stdc-predef.h /usr/include/arpa/inet.h \
  /usr/include/features.h /usr/include/features-time64.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \

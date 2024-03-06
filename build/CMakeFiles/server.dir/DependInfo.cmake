@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/dongil/work/programming101dev/templates/template-c/src/server.c" "CMakeFiles/server.dir/src/server.c.o" "gcc" "CMakeFiles/server.dir/src/server.c.o.d"
+  "/home/dongil/work/programming101dev/templates/netshell/src/server.c" "CMakeFiles/server.dir/src/server.c.o" "gcc" "CMakeFiles/server.dir/src/server.c.o.d"
   )
 
 # Targets to which this target links.

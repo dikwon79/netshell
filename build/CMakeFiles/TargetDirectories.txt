@@ -1,5 +1,5 @@
-/home/dongil/work/programming101dev/templates/template-c/build/CMakeFiles/main.dir
-/home/dongil/work/programming101dev/templates/template-c/build/CMakeFiles/server.dir
-/home/dongil/work/programming101dev/templates/template-c/build/CMakeFiles/format.dir
-/home/dongil/work/programming101dev/templates/template-c/build/CMakeFiles/edit_cache.dir
-/home/dongil/work/programming101dev/templates/template-c/build/CMakeFiles/rebuild_cache.dir
+/home/dongil/work/programming101dev/templates/netshell/build/CMakeFiles/main.dir
+/home/dongil/work/programming101dev/templates/netshell/build/CMakeFiles/server.dir
+/home/dongil/work/programming101dev/templates/netshell/build/CMakeFiles/format.dir
+/home/dongil/work/programming101dev/templates/netshell/build/CMakeFiles/edit_cache.dir
+/home/dongil/work/programming101dev/templates/netshell/build/CMakeFiles/rebuild_cache.dir
