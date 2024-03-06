@@ -1,0 +1,1 @@
+/usr/bin/gcc -g -fno-sanitize-recover=all -fno-stack-limit -fsanitize=unreachable -fstack-protector -fstack-protector-all -fstack-protector-strong -ftls-model=global-dynamic -fvtv-debug -fcf-protection=full CMakeFiles/main.dir/src/main.c.o -o main   -L/usr/local/lib 

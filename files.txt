@@ -1,0 +1,2 @@
+main src/main.c
+server src/server.c
