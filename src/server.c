@@ -1,5 +1,6 @@
 #include <arpa/inet.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <inttypes.h>
 #include <pthread.h>
 #include <signal.h>
@@ -16,6 +17,8 @@
 #define BASE_TEN 10
 #define BACKLOG 5
 
+#define MAX_SIZE_ARG 16
+
 static void           parse_arguments(int argc, char *argv[], char **address, char **port);
 static void           handle_arguments(const char *binary_name, const char *address, const char *port_str, in_port_t *port);
 static in_port_t      parse_in_port_t(const char *binary_name, const char *port_str);
@@ -25,6 +28,7 @@ static void           socket_bind(int sockfd, struct sockaddr_storage *addr, in_
 static void           start_listening(int server_fd, int backlog);
 _Noreturn static void usage(const char *program_name, int exit_code, const char *message);
 void                 *handle_client(void *arg);
+void                  convert_cmd(char *cmd);
 
 // int             clnt_socks[MAX_CLIENTS];    // Array to store client sockets
 // pthread_mutex_t mutex;                      // Mutex to synchronize access to the client sockets array
@@ -327,30 +331,107 @@ void *handle_client(void *arg)
     int                clnt_sock  = *(args->clnt_sock_ptr);
     pthread_mutex_t   *mutex      = args->mutex;
     int               *clnt_socks = args->clnt_socks;
-    char               buf[BUF_SIZE];
+    char               buffer[BUF_SIZE];
 
-    // char buf[BUF_SIZE];
-    // int  clnt_sock = *((int *)arg);
-    free(arg);    // Free the allocated memory
+    char *argv[MAX_SIZE_ARG];
+
+    // Initialize argv array with NULL
+    for(int j = 0; j < MAX_SIZE_ARG; j++)
+    {
+        argv[j] = NULL;
+    }
 
     while(1)
     {
-        int str_len = (int)read(clnt_sock, buf, sizeof(buf));
+        memset(buffer, 0, sizeof(buffer));
+        int str_len = (int)read(clnt_sock, buffer, sizeof(buffer));
         if(str_len <= 0)
         {
             break;
         }
-
-        // Write the received message to all connected clients
-        pthread_mutex_lock(mutex);
-        for(int i = 0; i < MAX_CLIENTS; ++i)
+        printf("shell> %s", buffer);
+        if((strlen(buffer) > 0) && (buffer[strlen(buffer) - 1] == '\n'))
         {
-            if(clnt_socks[i] != 0 && clnt_socks[i] != clnt_sock)
+            buffer[strlen(buffer) - 1] = '\0';
+        }
+        // bypass empty commands
+        if(!strcmp("", buffer))
+        {
+            continue;
+        }
+
+        // check for "exit" command
+        if(!strcmp("exit", buffer))
+        {
+            break;
+        }
+        // convert
+        char *ptr;
+        char *saveptr;
+        int   i = 0;
+        ptr     = strtok_r(buffer, " ", &saveptr);
+        while(ptr != NULL)
+        {
+            // printf("%s\n", ptr);
+            argv[i] = ptr;
+            i++;
+            ptr = strtok_r(NULL, " ", &saveptr);
+        }
+
+        // Check for "&"
+        if(!strcmp("&", argv[i - 1]))
+        {
+            argv[i - 1] = NULL;    // Remove the "&" from argv
+
+            // Dynamically allocate memory for "&" and copy it
+            argv[i] = strdup("&");
+            if(argv[i] == NULL)
             {
-                write(clnt_socks[i], buf, (size_t)str_len);
+                perror("strdup");
+                exit(EXIT_FAILURE);
             }
         }
-        pthread_mutex_unlock(mutex);
+        else
+        {
+            argv[i] = NULL;
+        }
+
+        // fork and execute the command
+        pid_t pid = fork();
+        if(-1 == pid)
+        {
+            printf("failed to create a child\n");
+        }
+        else if(0 == pid)
+        {
+            // printf("hello from child\n");
+            // execute a command
+
+            // 최대 문자열 크기 + 2 (더블 쿼테이션을 포함하여 저장하기 위해)
+            char str_with_quotes[BUF_SIZE];
+
+            // 변수 값을 포함하여 문자열 생성
+            sprintf(str_with_quotes, "/bin/%s", argv[0]);
+
+            // 문자열 출력
+            printf("%s\n", str_with_quotes);
+
+            // Execute the command via execv
+            if(execv(str_with_quotes, argv) == -1)
+            {
+                perror("Error executing command");
+                exit(EXIT_FAILURE);
+            }
+        }
+        else
+        {
+            // printf("hello from parent\n");
+            // wait for the command to finish if "&" is not present
+            if(argv[i] == NULL)
+            {
+                waitpid(pid, NULL, 0);
+            }
+        }
     }
 
     // Remove the disconnected client from the array
@@ -364,7 +445,7 @@ void *handle_client(void *arg)
         }
     }
     pthread_mutex_unlock(mutex);
-
+    free(arg);
     close(clnt_sock);
     return NULL;
 }
