@@ -10,7 +10,7 @@
 #include <unistd.h>
 
 #define UNKNOWN_OPTION_MESSAGE_LEN 24
-#define BUF_SIZE 30
+#define BUF_SIZE 1024
 #define BASE_TEN 10
 //#define POSITION 100
 
@@ -55,7 +55,7 @@ int main(int args, char *argv[])
         char message[BUF_SIZE];
         memset(message, 0, sizeof(message));
 
-        fputs("shell>\t", stdout);
+        fputs("Enter Command:", stdout);
         fgets(message, BUF_SIZE, stdin);
 
         // Construct the message with user name
@@ -289,7 +289,7 @@ static void *receive_messages(void *arg)
 
         // Clear the entire line
         printf("\033[K");
-        printf(" printf('shell>\t %s", message);
+        printf("%s\nEnter Command:", message);
 
         fflush(stdout);
     }

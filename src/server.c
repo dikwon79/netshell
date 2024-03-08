@@ -18,6 +18,7 @@
 #define BACKLOG 5
 
 #define MAX_SIZE_ARG 16
+#define OUT_BUF 2048
 
 static void           parse_arguments(int argc, char *argv[], char **address, char **port);
 static void           handle_arguments(const char *binary_name, const char *address, const char *port_str, in_port_t *port);
@@ -349,7 +350,7 @@ void *handle_client(void *arg)
         {
             break;
         }
-        printf("shell> %s", buffer);
+        // printf("shell> %s", buffer);
         if((strlen(buffer) > 0) && (buffer[strlen(buffer) - 1] == '\n'))
         {
             buffer[strlen(buffer) - 1] = '\0';
@@ -397,15 +398,28 @@ void *handle_client(void *arg)
         }
 
         // fork and execute the command
+
+        int pipefd[2];
+
+        // 파이프 생성 - pipe2() 함수 사용
+        if(pipe2(pipefd, O_CLOEXEC) == -1)
+        {
+            perror("pipe2");
+            exit(EXIT_FAILURE);
+        }
         pid_t pid = fork();
-        if(-1 == pid)
+
+        if(pid == -1)
         {
             printf("failed to create a child\n");
         }
-        else if(0 == pid)
+        else if(pid == 0)
         {
             // printf("hello from child\n");
             // execute a command
+            // 표준 출력을 파이프로 리다이렉트
+            dup2(pipefd[1], STDOUT_FILENO);
+            close(pipefd[0]);    // 파이프의 읽기측 닫음
 
             // 최대 문자열 크기 + 2 (더블 쿼테이션을 포함하여 저장하기 위해)
             char str_with_quotes[BUF_SIZE];
@@ -414,7 +428,7 @@ void *handle_client(void *arg)
             sprintf(str_with_quotes, "/bin/%s", argv[0]);
 
             // 문자열 출력
-            printf("%s\n", str_with_quotes);
+            // printf("%s\n", str_with_quotes);
 
             // Execute the command via execv
             if(execv(str_with_quotes, argv) == -1)
@@ -427,10 +441,46 @@ void *handle_client(void *arg)
         {
             // printf("hello from parent\n");
             // wait for the command to finish if "&" is not present
+            close(pipefd[1]);    // 파이프의 쓰기측 닫음
+
             if(argv[i] == NULL)
             {
                 waitpid(pid, NULL, 0);
             }
+
+            ssize_t bytes_read;
+            printf("Received data from child process:\n");
+            char outbuffer[OUT_BUF];
+            while((bytes_read = read(pipefd[0], outbuffer, sizeof(outbuffer))) > 0)
+            {
+                // 읽은 데이터를 출력함
+                write(STDOUT_FILENO, outbuffer, (size_t)bytes_read);
+
+                // 각 클라이언트 소켓에 데이터를 전송합니다.
+
+                pthread_mutex_lock(mutex);
+                for(int k = 0; k < MAX_CLIENTS; ++k)
+                {
+                    if(clnt_socks[k] != 0)
+                    {
+                        ssize_t bytes_written = write(clnt_socks[k], outbuffer, (size_t)bytes_read);
+                        if(bytes_written != bytes_read)
+                        {
+                            perror("write");
+                            // 오류 처리를 추가하세요.
+                        }
+                    }
+                }
+                pthread_mutex_unlock(mutex);
+            }
+
+            if(bytes_read == -1)
+            {
+                perror("read");
+                exit(EXIT_FAILURE);
+            }
+
+            close(pipefd[0]);    // 파이프의 읽기측 닫음
         }
     }
 
