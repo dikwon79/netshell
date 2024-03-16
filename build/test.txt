@@ -1,0 +1,20 @@
+total 328
+-rw-rw-r-- 1 dongil dongil  13209 Mar 13 23:48 CMakeCache.tdrwxrwxr-x 6 dongil dongil   4096 Mar 15 20:03 CMakeFiles
+-rw-rw-r-- 1 dongil dongil   1689 Mar 13 23:48 cmake_install.cmake
+-rwxrwxr-x 1 dongil dongil 119128 Mar 15 20:03 main
+-rw-rw-r-- 1 dongil dongil   6881 Mar 13 23:48 Makefile
+-rwxrwxr-x 1 dongil dongil 173592 Mar 15 20:03 server
+-rw-r--r-- 1 dongil dongil      0 Mar 15 20:04 test.txt
+-rw-r--r-- 1 dongil dongil      0 Mar 15 15:57 text.txt
+-rw-r--r-- 1 dongil dongil      6 Mar 15 15:47 t.txt
+.
+..
+CMakeCache.txt
+CMakeFiles
+cmake_install.cmake
+main
+Makefile
+server
+test.txt
+text.txt
+t.txt
