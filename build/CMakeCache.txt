@@ -39,8 +39,8 @@ CMAKE_BUILD_TYPE:STRING=Debug
 //Enable/Disable color output during build.
 CMAKE_COLOR_MAKEFILE:BOOL=ON
 
-//C compiler
-CMAKE_C_COMPILER:STRING=/usr/bin/gcc
+//No help, variable specified on the command line.
+CMAKE_C_COMPILER:UNINITIALIZED=gcc
 
 //A wrapper around 'ar' adding the appropriate '--plugin' option
 // for the GCC compiler
@@ -131,7 +131,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=main
+CMAKE_PROJECT_NAME:STATIC=client
 
 //Value Computed by CMake
 CMAKE_PROJECT_VERSION:STATIC=0.0.1
@@ -221,6 +221,15 @@ SANITIZER_address:UNINITIALIZED=ON
 
 //No help, variable specified on the command line.
 SANITIZER_undefined:UNINITIALIZED=ON
+
+//Value Computed by CMake
+client_BINARY_DIR:STATIC=/home/dongil/work/programming101dev/templates/netshell/build
+
+//Value Computed by CMake
+client_IS_TOP_LEVEL:STATIC=ON
+
+//Value Computed by CMake
+client_SOURCE_DIR:STATIC=/home/dongil/work/programming101dev/templates/netshell
 
 //Value Computed by CMake
 main_BINARY_DIR:STATIC=/home/dongil/work/programming101dev/templates/netshell/build

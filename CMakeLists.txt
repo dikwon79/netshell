@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(main
+project(client
         VERSION 0.0.1
         DESCRIPTION ""
         LANGUAGES C)
@@ -11,18 +11,18 @@ set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
-list(APPEND SOURCES ${CMAKE_SOURCE_DIR}/src/main.c)
+list(APPEND SOURCES ${CMAKE_SOURCE_DIR}/src/client.c)
 
-set(main_SOURCES
-    ${CMAKE_SOURCE_DIR}/src/main.c
+set(client_SOURCES
+    ${CMAKE_SOURCE_DIR}/src/client.c
 )
 
-set(main_HEADERS
+set(client_HEADERS
 )
 
-add_executable(main ${main_SOURCES})
-target_include_directories(main PUBLIC ${CMAKE_SOURCE_DIR}/include)
-target_include_directories(main PRIVATE /usr/local/include)
+add_executable(client ${client_SOURCES})
+target_include_directories(client PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(client PRIVATE /usr/local/include)
 
 # Check if the system uses 64-bit libraries
 get_property(LIB64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
@@ -34,8 +34,8 @@ else()
     set(LIBSUFFIX "")
 endif()
 
-target_link_directories(main PRIVATE /usr/local/lib${LIBSUFFIX})
-target_link_options(main PRIVATE ${INSTRUMENTATION_FLAGS_LIST})
+target_link_directories(client PRIVATE /usr/local/lib${LIBSUFFIX})
+target_link_options(client PRIVATE ${INSTRUMENTATION_FLAGS_LIST})
 
 
 list(APPEND SOURCES ${CMAKE_SOURCE_DIR}/src/server.c)
@@ -161,11 +161,11 @@ set(STANDARD_FLAGS
     -Werror
 )
 
-target_link_directories(main PRIVATE /usr/local/lib${LIBSUFFIX})
-target_link_options(main PRIVATE ${INSTRUMENTATION_FLAGS_LIST})
+target_link_directories(client PRIVATE /usr/local/lib${LIBSUFFIX})
+target_link_options(client PRIVATE ${INSTRUMENTATION_FLAGS_LIST})
 
-# Set compiler flags for the target main
-target_compile_options(main PRIVATE
+# Set compiler flags for the target client
+target_compile_options(client PRIVATE
     ${STANDARD_FLAGS}
     ${ANALYZER_FLAGS_LIST}
     ${DEBUG_FLAGS_LIST}
@@ -173,7 +173,7 @@ target_compile_options(main PRIVATE
     ${OPTIMIZATION_FLAGS_LIST}
     ${WARNING_FLAGS_LIST}
 )
-# Add target_link_libraries for main
+# Add target_link_libraries for client
 
 # Set compiler flags for the target server
 target_compile_options(server PRIVATE
@@ -208,10 +208,10 @@ add_custom_target(format
     COMMENT "Running clang-format"
 )
 
-add_dependencies(main format)
+add_dependencies(client format)
 
 add_custom_command(
-    TARGET main POST_BUILD
+    TARGET client POST_BUILD
     COMMAND ${CLANG_TIDY} ${SOURCES} ${HEADERS} -quiet --warnings-as-errors='*' -checks=*,-llvmlibc-restrict-system-libc-headers,-altera-struct-pack-align,-readability-identifier-length,-altera-unroll-loops,-cppcoreguidelines-init-variables,-cert-err33-c,-modernize-macro-to-enum,-bugprone-easily-swappable-parameters,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-altera-id-dependent-backward-branch,-concurrency-mt-unsafe,-misc-unused-parameters,-hicpp-signed-bitwise,-google-readability-todo,-cert-msc30-c,-cert-msc50-cpp,-readability-function-cognitive-complexity,-clang-analyzer-security.insecureAPI.strcpy,-cert-env33-c,-android-cloexec-accept,-clang-analyzer-security.insecureAPI.rand,-misc-include-cleaner,-llvm-header-guard -- ${STANDARD_FLAGS} -I${CMAKE_SOURCE_DIR}/include -I/usr/local/include
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Running clang-tidy"
@@ -220,7 +220,7 @@ add_custom_command(
 if (CMAKE_C_COMPILER MATCHES ".*/clang.*")
     # Add a custom target for clang --analyze
     add_custom_command(
-        TARGET main POST_BUILD
+        TARGET client POST_BUILD
         COMMAND ${CMAKE_C_COMPILER} --analyzer-output text --analyze -Xclang -analyzer-checker=core --analyze -Xclang -analyzer-checker=deadcode -Xclang -analyzer-checker=security -Xclang -analyzer-disable-checker=security.insecureAPI.DeprecatedOrUnsafeBufferHandling -Xclang -analyzer-checker=unix -Xclang -analyzer-checker=unix ${CMAKE_C_FLAGS} ${STANDARD_FLAGS} -I${CMAKE_SOURCE_DIR}/include -I/usr/local/include ${SOURCES} ${HEADERS}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Running clang --analyze"
@@ -228,14 +228,14 @@ if (CMAKE_C_COMPILER MATCHES ".*/clang.*")
 
     # Add a custom command to delete .gch files after the analysis
     add_custom_command(
-        TARGET main POST_BUILD
+        TARGET client POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_SOURCE_DIR}/include/*.gch
         COMMENT "Removing .gch files"
     )
 endif ()
 
 add_custom_command(
-    TARGET main POST_BUILD
+    TARGET client POST_BUILD
     COMMAND ${CPPCHECK} --error-exitcode=1 --force --quiet --inline-suppr --library=posix --enable=all --suppress=missingIncludeSystem --suppress=unusedFunction --suppress=unmatchedSuppression --suppress=checkersReport -I${CMAKE_SOURCE_DIR}/include -I/usr/local/include ${SOURCES} ${HEADERS}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Running cppcheck"

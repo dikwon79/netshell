@@ -68,7 +68,7 @@ include CMakeFiles/format.dir/progress.make
 
 CMakeFiles/format:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/dongil/work/programming101dev/templates/netshell/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Running clang-format"
-	cd /home/dongil/work/programming101dev/templates/netshell && /usr/bin/clang-format --style=file -i /home/dongil/work/programming101dev/templates/netshell/src/main.c /home/dongil/work/programming101dev/templates/netshell/src/server.c
+	cd /home/dongil/work/programming101dev/templates/netshell && /usr/bin/clang-format --style=file -i /home/dongil/work/programming101dev/templates/netshell/src/client.c /home/dongil/work/programming101dev/templates/netshell/src/server.c
 
 format: CMakeFiles/format
 format: CMakeFiles/format.dir/build.make

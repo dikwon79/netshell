@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <inttypes.h>
 #include <pthread.h>
+#include <signal.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -12,7 +13,7 @@
 #define UNKNOWN_OPTION_MESSAGE_LEN 24
 #define BUF_SIZE 1024
 #define BASE_TEN 10
-//#define POSITION 100
+#define POSITION 14
 
 static void           parse_arguments(int argc, char *argv[], char **address, char **port);
 static void           handle_arguments(const char *binary_name, const char *address, const char *port_str, in_port_t *port);
@@ -23,6 +24,15 @@ static void           socket_connect(int sockfd, struct sockaddr_storage *addr, 
 static void          *receive_messages(void *arg);
 static void           socket_close(int client_fd);
 _Noreturn static void usage(const char *program_name, int exit_code, const char *message);
+void                  sigint_handler();
+
+void sigint_handler()
+{
+    printf("\nCtrl-C you've pressed!!\n");
+    printf("if you press that key, it will terminate....\n");
+    write(STDOUT_FILENO, "Enter command:", POSITION);
+    signal(SIGINT, SIG_DFL);
+}
 
 int main(int args, char *argv[])
 {
@@ -49,6 +59,8 @@ int main(int args, char *argv[])
         close(sockfd);
         exit(EXIT_FAILURE);
     }
+
+    signal(SIGINT, sigint_handler);
 
     while(1)
     {
