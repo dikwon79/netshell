@@ -508,7 +508,7 @@ void *handle_client(void *arg)
         int pipefd[2];
 
         // 파이프 생성 - pipe2() 함수 사용
-        if(pipe2(pipefd, O_CLOEXEC) == -1)
+        if(pipe2(pipefd, O_CLOEXEC) == -1)    // NOLINT
         {
             perror("pipe2");
             exit(EXIT_FAILURE);
@@ -577,19 +577,42 @@ void *handle_client(void *arg)
 
                 close(pipefd[0]);    // 파이프의 읽기측 닫음
 
-                char str_with_quotes[BUF_SIZE];
-
-                // 변수 값을 포함하여 문자열 생성
-                sprintf(str_with_quotes, "/bin/%s", argv[0]);
-
-                // 문자열 출력
-                // printf("%s\n", str_with_quotes);
-
-                // Execute the command via execv
-                if(execv(str_with_quotes, argv) == -1)
+                if(strcmp(argv[0], "cd") == 0)
                 {
-                    perror("Error executing command");
-                    exit(EXIT_FAILURE);
+                    // "cd" 명령어 처리
+                    if(argv[1] == NULL)
+                    {
+                        // 목적지 디렉토리가 지정되지 않은 경우 홈 디렉토리로 변경
+                        if(chdir(getenv("HOME")) != 0)
+                        {
+                            perror("chdir");
+                        }
+                    }
+                    else
+                    {
+                        // 목적지 디렉토리로 변경
+                        if(chdir(argv[1]) != 0)
+                        {
+                            perror("chdir");
+                        }
+                    }
+                }
+                else
+                {
+                    char str_with_quotes[BUF_SIZE];
+
+                    // 변수 값을 포함하여 문자열 생성
+                    sprintf(str_with_quotes, "/bin/%s", argv[0]);
+
+                    // 문자열 출력
+                    // printf("%s\n", str_with_quotes);
+
+                    // Execute the command via execv
+                    if(execv(str_with_quotes, argv) == -1)
+                    {
+                        perror("Error executing command");
+                        exit(EXIT_FAILURE);
+                    }
                 }
             }
         }
